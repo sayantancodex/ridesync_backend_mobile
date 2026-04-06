@@ -149,6 +149,11 @@ app.get('/api/rides/:code', authenticate, async (req, res) => {
         .populate('riders', 'name email lat lng')
         .populate('pendingRiders', 'name email');
       if (!ride) return res.status(404).json({ message: 'Ride not found' });
+      
+      // Zero-Crash Filter: Remove any null users that failed to populate
+      ride.riders = ride.riders.filter(r => r !== null);
+      ride.pendingRiders = ride.pendingRiders.filter(r => r !== null);
+      
       res.status(200).json(ride);
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
